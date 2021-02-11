@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sparkjava-mysql
+  labels:
+    app: sparkjava-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sparkjava-mysql
+  template:
+    metadata:
+      labels:
+        app: sparkjava-mysql
+    spec:
+      containers:
+      - name: sparkjava-mysql
+        image: teperwoman/sparkjava-mysql
+        imagePullPolicy: Always
+        env:
+          - name: db-password
+            value: db-vp2lf
+        ports:
+        - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql:8.0.19
+  labels:
+    app: mysql:8.0.19
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql:8.0.19
+  template:
+    metadata:
+      labels:
+        app: mysql:8.0.19
+    spec:
+      containers:
+      - name: mysql:8.0.19
+        image: mysql:8.0.19
+        env:
+          - name: db-password
+            value: db-vp2lf
+          - name: POSTGRES_DB
+            value: example
+        ports:
+        - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sparkjava-mysql
+spec:
+  selector:
+    app: sparkjava-mysql
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql:8.0.19
+spec:
+  selector:
+    app: mysql:8.0.19
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
