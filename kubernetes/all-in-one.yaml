@@ -15,38 +15,45 @@ spec:
         app: sparkjava-mysql
     spec:
       containers:
-      - name: sparkjava-mysql
-        image: teperwoman/sparkjava-mysql
-        imagePullPolicy: Always
-        env:
-          - name: db-password
-            value: db-vp2lf
-        ports:
-        - containerPort: 8080
+        - name: sparkjava-mysql
+          image: teperwoman/sparkjava-mysql
+          imagePullPolicy: Always
+          env:
+            - name: db-password
+              value: db-vp2lf
+          ports:
+          - containerPort: 8080
+          volumeMounts:
+          - name: kuku
+            mountPath: /run/secrets/db-password
+      volumes:
+        - name: kuku
+          configMap:
+            name: sparkjava-mysql
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql:8.0.19
+  name: mysql-db
   labels:
-    app: mysql:8.0.19
+    app: mysql-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql:8.0.19
+      app: mysql-db
   template:
     metadata:
       labels:
-        app: mysql:8.0.19
+        app: mysql-db
     spec:
       containers:
-      - name: mysql:8.0.19
+      - name: mysql-db
         image: mysql:8.0.19
         env:
-          - name: db-password
+          - name: MYSQL_ROOT_PASSWORD
             value: db-vp2lf
-          - name: POSTGRES_DB
+          - name: MYSQL_DATABASE
             value: example
         ports:
         - containerPort: 3306
@@ -66,11 +73,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql:8.0.19
+  name: mysql-db
 spec:
   selector:
-    app: mysql:8.0.19
+    app: mysql-db
   ports:
     - protocol: TCP
       port: 3306
       targetPort: 3306
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sparkjava-mysql
+data:
+  password.txt: db-vp2lf
