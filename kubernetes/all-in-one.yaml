@@ -18,18 +18,19 @@ spec:
         - name: sparkjava-mysql
           image: teperwoman/sparkjava-mysql
           imagePullPolicy: Always
-          env:
-            - name: db-password
-              value: db-vp2lf
           ports:
           - containerPort: 8080
           volumeMounts:
           - name: kuku
             mountPath: /run/secrets/db-password
+            subPath: db-password
       volumes:
         - name: kuku
           configMap:
             name: sparkjava-mysql
+            items:
+              - key: db-password
+                path: db-password
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -87,4 +88,4 @@ kind: ConfigMap
 metadata:
   name: sparkjava-mysql
 data:
-  password.txt: db-vp2lf
+  db-password: db-vp2lf
